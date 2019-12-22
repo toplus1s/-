@@ -53,6 +53,7 @@ private:
     Ui::MainWindow *ui;
     string filepath;
     QUndoStack *m_UndoStack;
+    QString filename = "";
 
 };
 
@@ -60,12 +61,11 @@ private:
 class myCommand: public QUndoCommand
 {
 public:
-    myCommand(QString str,QString id, bool oldT, bool newT);
+    myCommand(QString str,QString id);
     void redo();
     void undo();
 private:
     QString m_str, m_id;
-    bool m_oldT, m_newT;
 };
 
 

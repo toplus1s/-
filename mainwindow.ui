@@ -24,9 +24,9 @@
    <widget class="QTextBrowser" name="txt">
     <property name="geometry">
      <rect>
-      <x>165</x>
-      <y>51</y>
-      <width>831</width>
+      <x>0</x>
+      <y>0</y>
+      <width>961</width>
       <height>521</height>
      </rect>
     </property>
@@ -120,8 +120,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="undo"/>
-   <addaction name="redo"/>
    <addaction name="separator"/>
    <addaction name="new_2"/>
    <addaction name="open"/>
@@ -225,30 +223,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
-   </property>
-  </action>
-  <action name="undo">
-   <property name="icon">
-    <iconset>
-     <normaloff>../icon/undo.ico</normaloff>../icon/undo.ico</iconset>
-   </property>
-   <property name="text">
-    <string>撤销</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Alt+Z</string>
-   </property>
-  </action>
-  <action name="redo">
-   <property name="icon">
-    <iconset>
-     <normaloff>../icon/redo.ico</normaloff>../icon/redo.ico</iconset>
-   </property>
-   <property name="text">
-    <string>重做</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+Z</string>
    </property>
   </action>
   <action name="del">

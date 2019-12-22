@@ -99,7 +99,7 @@ public:
     void recycle(QString s);
     void restore(QString t, QString s);
     bool search2(QString s, QString t);
-
+    void init();
     unsigned long long num()
     {
         return tea.size() + ass.size() + sta.size() + tst.size();

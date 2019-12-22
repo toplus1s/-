@@ -13,15 +13,13 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#pragma execution_character_set("utf-8")
+//#pragma execution_character_set("utf-8")
 using namespace std;
 
-myCommand::myCommand(QString str, QString id, bool oldT, bool newT)
+myCommand::myCommand(QString str, QString id)
 {
               m_str = str;
               m_id = id;
-              m_oldT = oldT;
-              m_newT = newT;
 
         }
 
@@ -59,18 +57,21 @@ MainWindow::MainWindow(QWidget *parent)
     this->setWindowIcon(QIcon("../icon/myicon.ico"));
     this->setWindowTitle("高校人员信息管理系统");
     ui->txt->setStyleSheet("QTextEdit{border-width:0;border-style:outset}");
-    ui->txt->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    ui->txt->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    ui->txt->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->txt->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->txt->verticalScrollBar()->setValue(ui->txt->verticalScrollBar()->maximumHeight());
     ui->txt->setLineWrapMode(QTextEdit::NoWrap);
     ui->save->setEnabled(0);
     ui->save_ano->setEnabled(0);
     ui->close->setEnabled(0);
     ui->export_2->setEnabled(0);
+    ui->menu_E->setEnabled(0);
+    ui->menu_C->setEnabled(0);
+    ui->txt->setEnabled(0);
     m_UndoStack = new QUndoStack(this);
     QAction *undoAction = m_UndoStack->createUndoAction(this);
     QAction *redoAction = m_UndoStack->createRedoAction(this);
-    undoAction->setIcon(QIcon("../icon/undo.ico")); //选两张撤销 前进的icon图片
+    undoAction->setIcon(QIcon("../icon/undo.ico"));
     redoAction->setIcon(QIcon("../icon/redo.ico"));
     ui->menu_E->insertAction(ui->menu_E->actions().value(ui->menu_E->actions().size()), undoAction);
     ui->menu_E->insertAction(undoAction, redoAction);
@@ -79,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
     redoAction->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_Y));
     connect(undoAction,SIGNAL(triggered()),this,SLOT(refresh()));
     connect(redoAction,SIGNAL(triggered()),this,SLOT(refresh()));
-
+    Sleep(1000);
 }
 
 MainWindow::~MainWindow()
@@ -91,13 +92,29 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_new_2_triggered()
 {
+    a.init();
+    if(ui->save->isEnabled())
+        showWarningDlg("你的上一个项目未保存");
     QString fileName = QFileDialog::getSaveFileName(this,tr("保存"),"D:",tr("信息管理系统文件(*.ims)"));
     string s = fileName.toStdString();
-    a.save(s);
-    ui->save->setEnabled(1);
-    ui->save_ano->setEnabled(1);
-    ui->close->setEnabled(1);
-    ui->export_2->setEnabled(1);
+    if(fileName != "")
+    {
+        filename = fileName;
+        this->setWindowTitle("高校人员信息管理系统@"+filename);
+        a.save(s);
+        ui->txt->setEnabled(1);
+        ui->save->setEnabled(1);
+        ui->save_ano->setEnabled(1);
+        ui->close->setEnabled(1);
+        ui->export_2->setEnabled(1);
+        ui->menu_E->setEnabled(1);
+        ui->menu_C->setEnabled(1);
+        ui->txt->document()->clear();
+        ui->txt->insertPlainText(a.output1(1,0));
+        ui->txt->insertPlainText(a.output2(1,0));
+        ui->txt->insertPlainText(a.output3(1,0));
+        ui->txt->insertPlainText(a.output4(1,0));
+    }
 }
 
 
@@ -105,22 +122,29 @@ void MainWindow::on_new_2_triggered()
 
 void MainWindow::on_open_triggered()
 {
-
+    a.init();
+    if(ui->save->isEnabled())
+        showWarningDlg("你的上一个项目未保存");
     QString fileName = QFileDialog::getOpenFileName(this,tr("打开"),"D:",tr("信息管理系统文件(*.ims);;""文本文档(*.txt)"));
     filepath= fileName.toStdString();
     if(filepath!="")
     {
+
         if(a.open(filepath))
         {
+            filename = fileName;
+            this->setWindowTitle("高校人员信息管理系统@"+filename);
+            ui->txt->setEnabled(1);
             ui->txt->document()->clear();
             ui->txt->insertPlainText(a.output1(1,0));
             ui->txt->insertPlainText(a.output2(1,0));
             ui->txt->insertPlainText(a.output3(1,0));
             ui->txt->insertPlainText(a.output4(1,0));
-            ui->save->setEnabled(1);
             ui->save_ano->setEnabled(1);
             ui->close->setEnabled(1);
             ui->export_2->setEnabled(1);
+            ui->menu_E->setEnabled(1);
+            ui->menu_C->setEnabled(1);
         }
         else
         {
@@ -128,16 +152,20 @@ void MainWindow::on_open_triggered()
             extern QString password;
             if(text == password)
             {
+                filename = fileName;
+                this->setWindowTitle("高校人员信息管理系统@"+filename);
                 a.openff(filepath);
+                ui->txt->setEnabled(1);
                 ui->txt->document()->clear();
                 ui->txt->insertPlainText(a.output1(1,0));
                 ui->txt->insertPlainText(a.output2(1,0));
                 ui->txt->insertPlainText(a.output3(1,0));
                 ui->txt->insertPlainText(a.output4(1,0));
-                ui->save->setEnabled(1);
                 ui->save_ano->setEnabled(1);
                 ui->close->setEnabled(1);
                 ui->export_2->setEnabled(1);
+                ui->menu_E->setEnabled(1);
+                ui->menu_C->setEnabled(1);
             }
             else
                 showWarningDlg("密码不正确！");
@@ -152,6 +180,8 @@ void MainWindow::on_open_triggered()
 void MainWindow::on_save_triggered()
 {
     a.save(filepath);
+    this->setWindowTitle("高校人员信息管理系统@"+filename);
+    ui->save->setEnabled(0);
 }
 
 
@@ -180,7 +210,18 @@ void MainWindow::on_export_2_triggered()
 
 void MainWindow::on_close_triggered()
 {
-    ui->txt->document()->clear();
+        if(ui->save->isEnabled())
+            showWarningDlg("你的项目未保存");
+        a.init();
+        this->setWindowTitle("高校人员信息管理系统");
+        ui->txt->document()->clear();
+        ui->txt->setEnabled(0);
+        ui->save->setEnabled(0);
+        ui->save_ano->setEnabled(0);
+        ui->close->setEnabled(0);
+        ui->export_2->setEnabled(0);
+        ui->menu_E->setEnabled(0);
+        ui->menu_C->setEnabled(0);
 }
 
 
@@ -188,6 +229,10 @@ void MainWindow::on_close_triggered()
 
 void MainWindow::on_quit_triggered()
 {
+
+    if(ui->save->isEnabled())
+        showWarningDlg("你的项目未保存");
+    a.init();
     qApp->quit();
 }
 
@@ -212,13 +257,15 @@ void MainWindow::on_del_triggered()
         string s = text.toStdString();
         if(a.del(s))
         {
-            showInfoDlg("删除成功\n");
-            m_UndoStack->push(new myCommand("del",text,0,1));
             ui->txt->document()->clear();
             ui->txt->insertPlainText(a.output1(1,0));
             ui->txt->insertPlainText(a.output2(1,0));
             ui->txt->insertPlainText(a.output3(1,0));
             ui->txt->insertPlainText(a.output4(1,0));
+            showInfoDlg("删除成功\n");
+            ui->save->setEnabled(1);
+            this->setWindowTitle("高校人员信息管理系统@"+filename+"*");
+            m_UndoStack->push(new myCommand("del",text));
         }
     }
     else
@@ -254,19 +301,51 @@ void MainWindow::on_add_triggered()
     {
         qDebug()<<a.search(dlgInfo->id());
             setinit s;
-            s.id=dlgInfo->id();
-            s.name=dlgInfo->name();
-            s.sex=dlgInfo->sex();
-            s.age=dlgInfo->age();
-            s.profession=dlgInfo->profession();
-            s.office=dlgInfo->office();
-            s.department=dlgInfo->department();
-            s.title=dlgInfo->title();
-            s.work=dlgInfo->work();
-            s.lab=dlgInfo->lab();
+            if(dlgInfo->id() != "")
+                s.id = dlgInfo->id();
+            else
+                s.id = "缺省";
+            if(dlgInfo->name() != "")
+                s.name=dlgInfo->name();
+            else
+                s.name = "缺省";
+            if(dlgInfo->sex() != "")
+                s.sex=dlgInfo->sex();
+            else
+                s.id = "缺省";
+            if(dlgInfo->age() != "")
+                s.age=dlgInfo->age();
+            else
+                s.age = "缺省";
+            if(dlgInfo->profession()!= "")
+                s.profession=dlgInfo->profession();
+            else
+                s.profession = "缺省";
+            if(dlgInfo->office() != "")
+                s.office=dlgInfo->office();
+            else
+                s.office = "缺省";
+            if(dlgInfo->department() != "")
+                s.department=dlgInfo->department();
+            else
+                s.department = "缺省";
+            if(dlgInfo->title() != "")
+                s.title=dlgInfo->title();
+            else
+                s.title = "缺省";
+            if(dlgInfo->work() != "")
+                s.work=dlgInfo->work();
+            else
+                s.work = "缺省";
+            if(dlgInfo->lab() != "")
+                s.lab=dlgInfo->lab();
+            else
+                s.lab = "缺省";
             a.input(dlgInfo->status(), s);
             showInfoDlg("添加成功\n");
-            m_UndoStack->push(new myCommand("add",s.id,0,1));
+            ui->save->setEnabled(1);
+            this->setWindowTitle("高校人员信息管理系统@"+filename+"*");
+            m_UndoStack->push(new myCommand("add",s.id));
             ui->txt->document()->clear();
             ui->txt->insertPlainText(a.output1(1,0));
             ui->txt->insertPlainText(a.output2(1,0));
@@ -304,25 +383,57 @@ void MainWindow::on_edit_triggered()
         if (ret == QDialog::Accepted)
         {
             setinit s;
-            s.id=dlgInfo->id();
-            s.name=dlgInfo->name();
-            s.sex=dlgInfo->sex();
-            s.age=dlgInfo->age();
-            s.profession=dlgInfo->profession();
-            s.office=dlgInfo->office();
-            s.department=dlgInfo->department();
-            s.title=dlgInfo->title();
-            s.work=dlgInfo->work();
-            s.lab=dlgInfo->lab();
+            if(dlgInfo->id() != "")
+                s.id = dlgInfo->id();
+            else
+                s.id = "缺省";
+            if(dlgInfo->name() != "")
+                s.name=dlgInfo->name();
+            else
+                s.name = "缺省";
+            if(dlgInfo->sex() != "")
+                s.sex=dlgInfo->sex();
+            else
+                s.id = "缺省";
+            if(dlgInfo->age() != "")
+                s.age=dlgInfo->age();
+            else
+                s.age = "缺省";
+            if(dlgInfo->profession()!= "")
+                s.profession=dlgInfo->profession();
+            else
+                s.profession = "缺省";
+            if(dlgInfo->office() != "")
+                s.office=dlgInfo->office();
+            else
+                s.office = "缺省";
+            if(dlgInfo->department() != "")
+                s.department=dlgInfo->department();
+            else
+                s.department = "缺省";
+            if(dlgInfo->title() != "")
+                s.title=dlgInfo->title();
+            else
+                s.title = "缺省";
+            if(dlgInfo->work() != "")
+                s.work=dlgInfo->work();
+            else
+                s.work = "缺省";
+            if(dlgInfo->lab() != "")
+                s.lab=dlgInfo->lab();
+            else
+                s.lab = "缺省";
             s.intst = dlgInfo->status();
             a.input(ss.id.toStdString(), s);
-            showInfoDlg("修改成功\n");
-            m_UndoStack->push(new myCommand(s.id, ss.id,0,1));
             ui->txt->document()->clear();
             ui->txt->insertPlainText(a.output1(1,0));
             ui->txt->insertPlainText(a.output2(1,0));
             ui->txt->insertPlainText(a.output3(1,0));
             ui->txt->insertPlainText(a.output4(1,0));
+            showInfoDlg("修改成功\n");
+            ui->save->setEnabled(1);
+            this->setWindowTitle("高校人员信息管理系统@"+filename+"*");
+            m_UndoStack->push(new myCommand(s.id, ss.id));
         }
         delete dlgInfo;
     }
@@ -452,7 +563,7 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::on_bug_triggered()
 {
-    QDesktopServices::openUrl(QUrl("http://www.github.com"));
+    QDesktopServices::openUrl(QUrl("https://github.com/toplus1s/-"));
 }
 
 
@@ -462,6 +573,8 @@ void MainWindow::on_bug_triggered()
 
 void MainWindow::refresh()
 {
+    ui->save->setEnabled(1);
+    this->setWindowTitle("高校人员信息管理系统@"+filename+"*");
     ui->txt->document()->clear();
     ui->txt->insertPlainText(a.output1(1,0));
     ui->txt->insertPlainText(a.output2(1,0));

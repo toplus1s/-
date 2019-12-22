@@ -317,7 +317,6 @@ void system:: recycle(QString s)
     for (auto i = delt.begin(); i != delt.end(); ++i)
         if ((*i).id == s)
         {
-                qDebug()<<"执行!";
                 input(i->intst,*i);
                 delt.erase(i);
                 break;
@@ -698,7 +697,7 @@ bool system::open(string s)
                 teacher b;
                 while (is >> b.id)
                 {
-                    if (b.id[0] > '9' || b.id[0] < '0')
+                    if (b.id == qstr2str(s2))
                         break;
                     is >> b.name >> b.sex >> b.age >> b.department >> b.profession >> b.title;
                     tea.push_back(b);
@@ -710,7 +709,7 @@ bool system::open(string s)
             assistant b;
             while (is >> b.id)
             {
-                if (b.id[0] > '9' || b.id[0] < '0')
+                if (b.id == qstr2str(s3))
                     break;
                 is >> b.name >> b.sex >> b.age >> b.lab >> b.work;
                 ass.push_back(b);
@@ -721,7 +720,7 @@ bool system::open(string s)
             staff b;
             while (is >> b.id)
             {
-                if (b.id[0] > '9' || b.id[0] < '0')
+                if (b.id == qstr2str(s4))
                     break;
                 is >> b.name >> b.sex >> b.age >> b.office >> b.work;
                 sta.push_back(b);
@@ -732,8 +731,6 @@ bool system::open(string s)
             tstaff b;
             while (is >> b.id)
             {
-                if (b.id[0] > '9' || b.id[0] < '0')
-                    break;
                 is >> b.name >> b.sex >> b.age >> b.department >> b.profession >> b.title >>b.office >> b.work;
                 tst.push_back(b);
             }
@@ -745,10 +742,6 @@ bool system::open(string s)
 
 void system::openff(string s)
     {
-        tea.clear();
-        sta.clear();
-        ass.clear();
-        tst.clear();
         ifstream is(s, ios::in);
         string t;
         if (is>>t)
@@ -801,4 +794,16 @@ void system::openff(string s)
     }
 
 
+void system::init()
+{
+    tea.clear();
+    sta.clear();
+    ass.clear();
+    tst.clear();
+    delt.clear();
+    extern QString password;
+    password = "";
+    extern int jilu;
+    jilu = 0;
+}
 
